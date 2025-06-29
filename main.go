@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	SIZE   = 100_000_000
+	//SIZE   = 100_000_000 True size
+	SIZE   = 1000 // For single goroutine
 	CHUNKS = 8
 )
 
@@ -30,17 +31,21 @@ func generateRandomElements(size int) ([]int, error) {
 // maximum returns the maximum number of elements.
 func maximum(data []int) int {
 	// ваш код здесь
-	fmt.Println(data[0])
+	var max int
+	for _, n := range data {
+		if n > max {
+			max = n
+		}
+	}
 
-	return 0
+	return max
 }
 
 // maxChunks returns the maximum number of elements in a chunks.
 func maxChunks(data []int) int {
 	// ваш код здесь
-	fmt.Println(data[0])
 
-	return 0
+	return data[0]
 }
 
 func main() {
@@ -52,7 +57,8 @@ func main() {
 
 	fmt.Println("Ищем максимальное значение в один поток")
 	// ваш код здесь
-	maximum(numbers)
+	maxNum := maximum(numbers)
+	fmt.Println(maxNum)
 
 	fmt.Printf("Максимальное значение элемента: %d\nВремя поиска: %d ms\n", max, elapsed)
 
