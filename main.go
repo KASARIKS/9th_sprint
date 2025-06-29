@@ -51,7 +51,27 @@ func maxChunks(data []int) int {
 	return max
 }
 
+func divideSlice(slice []int, parts int) [][]int {
+	var divided [][]int = make([][]int, parts)
+	basePartLength := int(len(slice) / parts)
+	i := 0
+	for part := range parts {
+		divided[part] = make([]int, basePartLength)
+		copy(divided[part], slice[i:i+basePartLength])
+		i += basePartLength
+	}
+
+	for i2 := i; i2 < len(slice); i2++ {
+		divided[i2-i] = append(divided[i2-i], slice[i2])
+	}
+
+	return divided
+}
+
 func main() {
+	fmt.Println(divideSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}, 8))
+
+	return
 
 	fmt.Printf("Генерируем %d целых чисел\n", SIZE)
 	numbers, _ := generateRandomElements(SIZE)
