@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -41,13 +42,19 @@ func maximum(data []int) int {
 
 // maxChunks returns the maximum number of elements in a chunks.
 func maxChunks(data []int) int {
+	var wg sync.WaitGroup
 	divided, _ := divideSlice(data, 8)
-	maxGos := make([]int, 8)
+	maxGos := make([]int, CHUNKS)
 
 	for i := 0; i < len(divided); i++ {
-		maxGos = append(maxGos, maximum(divided[i]))
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			maxGos = append(maxGos, maximum(divided[i]))
+		}()
 	}
 
+	wg.Wait()
 	return maximum(maxGos)
 }
 
@@ -59,9 +66,14 @@ func divideSlice(slice []int, parts int) ([][]int, error) {
 	var divided [][]int = make([][]int, parts)
 	basePartLength := int(len(slice) / parts)
 	i := 0
+
 	for part := range parts {
 		divided[part] = make([]int, basePartLength)
-		copy(divided[part], slice[i:i+basePartLength])
+
+		// Don't add wait to this goroutine, because wg.add it'll broken.
+		// As I guess, copy have it owns mutexes, or something.
+		go copy(divided[part], slice[i:i+basePartLength])
+
 		i += basePartLength
 	}
 
