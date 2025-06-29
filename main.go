@@ -43,7 +43,7 @@ func maximum(data []int) int {
 // maxChunks returns the maximum number of elements in a chunks.
 func maxChunks(data []int) int {
 	var wg sync.WaitGroup
-	divided, _ := divideSlice(data, 8)
+	divided, _ := divideSlice(data, CHUNKS)
 	maxGos := make([]int, CHUNKS)
 
 	for i := 0; i < len(divided); i++ {
@@ -70,7 +70,7 @@ func divideSlice(slice []int, parts int) ([][]int, error) {
 	for part := range parts {
 		divided[part] = make([]int, basePartLength)
 
-		// Don't add wait to this goroutine, because wg.add it'll broken.
+		// Don't add wait to this goroutine, because with wg.Add it's broken.
 		// As I guess, copy have it owns mutexes, or something.
 		go copy(divided[part], slice[i:i+basePartLength])
 
