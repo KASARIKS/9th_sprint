@@ -7,14 +7,13 @@ import (
 )
 
 const (
-	//SIZE   = 100_000_000 True size
-	SIZE   = 1000 // For single goroutine
+	SIZE = 100_000_000 // True size
+	//SIZE   = 1000 // For single goroutine
 	CHUNKS = 8
 )
 
 // generateRandomElements generates random elements.
 func generateRandomElements(size int) ([]int, error) {
-	// ваш код здесь
 	if size < 0 {
 		return []int{}, fmt.Errorf("size smaller than 0")
 	}
@@ -30,7 +29,6 @@ func generateRandomElements(size int) ([]int, error) {
 
 // maximum returns the maximum number of elements.
 func maximum(data []int) int {
-	// ваш код здесь
 	var max int
 	for _, n := range data {
 		if n > max {
@@ -43,28 +41,34 @@ func maximum(data []int) int {
 
 // maxChunks returns the maximum number of elements in a chunks.
 func maxChunks(data []int) int {
-	// ваш код здесь
+	var max int
+	for _, n := range data {
+		if n > max {
+			max = n
+		}
+	}
 
-	return data[0]
+	return max
 }
 
 func main() {
-	max, elapsed := 0, 0
 
-	fmt.Printf("Генерируем %d целых чисел", SIZE)
-	// ваш код здесь
+	fmt.Printf("Генерируем %d целых чисел\n", SIZE)
 	numbers, _ := generateRandomElements(SIZE)
 
 	fmt.Println("Ищем максимальное значение в один поток")
-	// ваш код здесь
-	maxNum := maximum(numbers)
-	fmt.Println(maxNum)
+
+	start := time.Now()
+	max := maximum(numbers)
+	elapsed := time.Since(start).Microseconds()
 
 	fmt.Printf("Максимальное значение элемента: %d\nВремя поиска: %d ms\n", max, elapsed)
 
-	fmt.Printf("Ищем максимальное значение в %d потоков", CHUNKS)
-	// ваш код здесь
-	maxChunks(numbers)
+	fmt.Printf("Ищем максимальное значение в %d потоков\n", CHUNKS)
+
+	start = time.Now()
+	max = maxChunks(numbers)
+	elapsed = time.Since(start).Microseconds()
 
 	fmt.Printf("Максимальное значение элемента: %d\nВремя поиска: %d ms\n", max, elapsed)
 }

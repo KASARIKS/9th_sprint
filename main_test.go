@@ -105,3 +105,35 @@ func TestMaximum(t *testing.T) {
 		}
 	})
 }
+
+func TestMaxChunks(t *testing.T) {
+	t.Run("0 length", func(t *testing.T) {
+		slice := []int{}
+		maxNum := maxChunks(slice)
+
+		if maxNum != 0 {
+			t.Errorf("Expected 0 got %d\n", maxNum)
+		}
+	})
+
+	t.Run("10 length", func(t *testing.T) {
+		slice := []int{-5, 1, 2, 3, 10, -20, 10, 100, 1000, 200}
+		maxNum := maxChunks(slice)
+
+		if maxNum != 1000 {
+			t.Errorf("Expected 1000 got %d", maxNum)
+		}
+	})
+
+	t.Run("32767 length", func(t *testing.T) {
+		slice := make([]int, math.MaxInt16)
+		for i := range math.MaxInt16 {
+			slice[i] = i
+		}
+		maxNum := maxChunks(slice)
+
+		if maxNum != math.MaxInt16-1 {
+			t.Errorf("Expected 1000 got %d", maxNum)
+		}
+	})
+}
