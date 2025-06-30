@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"sync"
 	"time"
 )
 
@@ -45,55 +44,37 @@ func maximum(data []int) int {
 }
 
 // maxChunks returns the maximum number of elements in a chunks.
+
+// Rarely tests fail on negatives numbers, give 0 and I don't understand why.
 func maxChunks(data []int) (int, error) {
 	if len(data) < CHUNKS {
 		return maximum(data), nil
 	}
 
-	var wg sync.WaitGroup
-	divided, err := divideSlice(data, CHUNKS)
-	if err != nil {
-		return 0, err
-	}
+	dividedMaximums, err := dividedMaximums(data, CHUNKS)
 
-	maxGos := make([]int, CHUNKS)
-
-	for i := 0; i < len(divided); i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			maxGos[i] = maximum(divided[i])
-		}()
-	}
-
-	wg.Wait()
-	return maximum(maxGos), nil
+	return maximum(dividedMaximums), err
 }
 
-func divideSlice(slice []int, parts int) ([][]int, error) {
+func dividedMaximums(slice []int, parts int) ([]int, error) {
 	if len(slice) < parts {
-		return [][]int{}, fmt.Errorf("Slice length tbigger than parts count")
+		return []int{}, fmt.Errorf("Slice length tbigger than parts count")
 	}
 
-	var divided [][]int = make([][]int, parts)
-	basePartLength := int(len(slice) / parts)
+	var dividedMaximums []int = make([]int, parts)
+	sliceLen := len(slice)
+	basePartLength := int(sliceLen / parts)
 	i := 0
 
-	for part := range parts {
-		divided[part] = make([]int, basePartLength)
-
-		// Don't add wait to this goroutine, because with wg.Add it's broken.
-		// As I guess, copy have it owns mutexes, or something.
-		go copy(divided[part], slice[i:i+basePartLength])
+	for part := range parts - 1 {
+		dividedMaximums[part] = maximum(slice[i : i+basePartLength])
 
 		i += basePartLength
 	}
 
-	for i2 := i; i2 < len(slice); i2++ {
-		divided[i2-i] = append(divided[i2-i], slice[i2])
-	}
+	dividedMaximums[parts-1] = maximum(slice[i:sliceLen])
 
-	return divided, nil
+	return dividedMaximums, nil
 }
 
 func main() {
