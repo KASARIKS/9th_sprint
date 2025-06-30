@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"sync"
 	"time"
 )
 
 const (
-	SIZE = 100_000_000 // True size
-	//SIZE   = 1000 // For single goroutine
+	SIZE   = 100_000_000
 	CHUNKS = 8
 )
 
@@ -44,8 +44,6 @@ func maximum(data []int) int {
 }
 
 // maxChunks returns the maximum number of elements in a chunks.
-
-// Rarely tests fail on negatives numbers, give 0 and I don't understand why.
 func maxChunks(data []int) (int, error) {
 	if len(data) < CHUNKS {
 		return maximum(data), nil
@@ -57,18 +55,24 @@ func maxChunks(data []int) (int, error) {
 }
 
 func dividedMaximums(slice []int, parts int) ([]int, error) {
+	var wg sync.WaitGroup
 	if len(slice) < parts {
 		return []int{}, fmt.Errorf("Slice length tbigger than parts count")
 	}
 
-	var dividedMaximums []int = make([]int, parts)
+	dividedMaximums := make([]int, parts)
 	sliceLen := len(slice)
 	basePartLength := int(sliceLen / parts)
 	i := 0
 
 	for part := range parts - 1 {
-		dividedMaximums[part] = maximum(slice[i : i+basePartLength])
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			dividedMaximums[part] = maximum(slice[i : i+basePartLength])
+		}()
 
+		wg.Wait()
 		i += basePartLength
 	}
 
@@ -95,10 +99,10 @@ func main() {
 	fmt.Printf("Ищем максимальное значение в %d потоков\n", CHUNKS)
 
 	start = time.Now()
-	max, err = maxChunks(numbers)
-	if err != nil {
-		log.Fatal(err)
-	}
+	max, _ = maxChunks(numbers)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	elapsed = time.Since(start).Microseconds()
 
