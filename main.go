@@ -49,38 +49,32 @@ func maxChunks(data []int) (int, error) {
 		return maximum(data), nil
 	}
 
-	dividedMaximums, err := dividedMaximums(data, CHUNKS)
-
-	return maximum(dividedMaximums), err
-}
-
-func dividedMaximums(slice []int, parts int) ([]int, error) {
 	var wg sync.WaitGroup
-	var mu sync.Mutex
-	if len(slice) < parts {
-		return []int{}, fmt.Errorf("Slice length tbigger than parts count")
+	if len(data) < CHUNKS {
+		return 0, fmt.Errorf("Slice length tbigger than parts count")
 	}
 
-	dividedMaximums := make([]int, parts)
-	sliceLen := len(slice)
-	basePartLength := int(sliceLen / parts)
-	i := 0
+	dividedMaximums := make([]int, CHUNKS)
+	sliceLen := len(data)
+	splitLength := int(sliceLen / CHUNKS)
+	var part int
 
-	for part := range parts - 1 {
+	for part = range CHUNKS - 1 {
+		startPos := part * splitLength
+		endPos := startPos + splitLength
+
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			mu.Lock()
-			dividedMaximums[part] = maximum(slice[i : i+basePartLength])
-			i += basePartLength
-			mu.Unlock()
+			dividedMaximums[part] = maximum(data[startPos:endPos])
 		}()
+
+		wg.Wait()
 	}
 
-	wg.Wait()
-	dividedMaximums[parts-1] = maximum(slice[i:sliceLen])
+	dividedMaximums[CHUNKS-1] = maximum(data[part:sliceLen])
 
-	return dividedMaximums, nil
+	return maximum(dividedMaximums), nil
 }
 
 func main() {
