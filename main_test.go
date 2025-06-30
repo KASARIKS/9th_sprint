@@ -110,7 +110,7 @@ func TestMaximum(t *testing.T) {
 		maxNum := maximum(slice)
 
 		if maxNum != -1 {
-			t.Errorf("Expected 1000 got %d", maxNum)
+			t.Errorf("Expected -1 got %d", maxNum)
 		}
 	})
 }
@@ -118,19 +118,27 @@ func TestMaximum(t *testing.T) {
 func TestMaxChunks(t *testing.T) {
 	t.Run("0 length", func(t *testing.T) {
 		slice := []int{}
-		maxNum := maxChunks(slice)
+		maxNum, err := maxChunks(slice)
 
 		if maxNum != 0 {
 			t.Errorf("Expected 0 got %d\n", maxNum)
+		}
+
+		if err != nil {
+			t.Errorf("Expected nil got %s", err)
 		}
 	})
 
 	t.Run("10 length", func(t *testing.T) {
 		slice := []int{-5, 1, 2, 3, 10, -20, 10, 100, 1000, 200}
-		maxNum := maxChunks(slice)
+		maxNum, err := maxChunks(slice)
 
 		if maxNum != 1000 {
 			t.Errorf("Expected 1000 got %d", maxNum)
+		}
+
+		if err != nil {
+			t.Errorf("Expected nil got %s", err)
 		}
 	})
 
@@ -139,19 +147,27 @@ func TestMaxChunks(t *testing.T) {
 		for i := range math.MaxInt16 {
 			slice[i] = i
 		}
-		maxNum := maxChunks(slice)
+		maxNum, err := maxChunks(slice)
 
 		if maxNum != math.MaxInt16-1 {
-			t.Errorf("Expected 1000 got %d", maxNum)
+			t.Errorf("Expected %d got %d", math.MaxInt16-1, maxNum)
+		}
+
+		if err != nil {
+			t.Errorf("Expected nil got %s", err)
 		}
 	})
 
 	t.Run("10 length negative", func(t *testing.T) {
 		slice := []int{-5, -1, -2, -3, -10, -20, -10, -100, -1000, -200}
-		maxNum := maximum(slice)
+		maxNum, err := maxChunks(slice)
 
 		if maxNum != -1 {
-			t.Errorf("Expected 1000 got %d", maxNum)
+			t.Errorf("Expected -1 got %d", maxNum)
+		}
+
+		if err != nil {
+			t.Errorf("Expected nil got %s", err)
 		}
 	})
 }

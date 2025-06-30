@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"sync"
 	"time"
@@ -30,8 +31,11 @@ func generateRandomElements(size int) ([]int, error) {
 
 // maximum returns the maximum number of elements.
 func maximum(data []int) int {
-	var max int
-	for _, n := range data {
+	if len(data) == 0 {
+		return 0
+	}
+	max := data[0]
+	for _, n := range data[1:] {
 		if n > max {
 			max = n
 		}
@@ -41,26 +45,34 @@ func maximum(data []int) int {
 }
 
 // maxChunks returns the maximum number of elements in a chunks.
-func maxChunks(data []int) int {
+func maxChunks(data []int) (int, error) {
+	if len(data) < CHUNKS {
+		return maximum(data), nil
+	}
+
 	var wg sync.WaitGroup
-	divided, _ := divideSlice(data, CHUNKS)
+	divided, err := divideSlice(data, CHUNKS)
+	if err != nil {
+		return 0, err
+	}
+
 	maxGos := make([]int, CHUNKS)
 
 	for i := 0; i < len(divided); i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			maxGos = append(maxGos, maximum(divided[i]))
+			maxGos[i] = maximum(divided[i])
 		}()
 	}
 
 	wg.Wait()
-	return maximum(maxGos)
+	return maximum(maxGos), nil
 }
 
 func divideSlice(slice []int, parts int) ([][]int, error) {
 	if len(slice) < parts {
-		return [][]int{}, fmt.Errorf("Slice lenght bigger than parts count")
+		return [][]int{}, fmt.Errorf("Slice length tbigger than parts count")
 	}
 
 	var divided [][]int = make([][]int, parts)
@@ -86,7 +98,10 @@ func divideSlice(slice []int, parts int) ([][]int, error) {
 
 func main() {
 	fmt.Printf("Генерируем %d целых чисел\n", SIZE)
-	numbers, _ := generateRandomElements(SIZE)
+	numbers, err := generateRandomElements(SIZE)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	fmt.Println("Ищем максимальное значение в один поток")
 
@@ -99,7 +114,11 @@ func main() {
 	fmt.Printf("Ищем максимальное значение в %d потоков\n", CHUNKS)
 
 	start = time.Now()
-	max = maxChunks(numbers)
+	max, err = maxChunks(numbers)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	elapsed = time.Since(start).Microseconds()
 
 	fmt.Printf("Максимальное значение элемента: %d\nВремя поиска: %d ms\n", max, elapsed)
