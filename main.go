@@ -56,6 +56,7 @@ func maxChunks(data []int) (int, error) {
 
 func dividedMaximums(slice []int, parts int) ([]int, error) {
 	var wg sync.WaitGroup
+	var mu sync.Mutex
 	if len(slice) < parts {
 		return []int{}, fmt.Errorf("Slice length tbigger than parts count")
 	}
@@ -69,13 +70,14 @@ func dividedMaximums(slice []int, parts int) ([]int, error) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+			mu.Lock()
 			dividedMaximums[part] = maximum(slice[i : i+basePartLength])
+			i += basePartLength
+			mu.Unlock()
 		}()
-
-		wg.Wait()
-		i += basePartLength
 	}
 
+	wg.Wait()
 	dividedMaximums[parts-1] = maximum(slice[i:sliceLen])
 
 	return dividedMaximums, nil
