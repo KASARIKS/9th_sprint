@@ -45,34 +45,34 @@ func maximum(data []int) int {
 
 // maxChunks returns the maximum number of elements in a chunks.
 func maxChunks(data []int) (int, error) {
-	if len(data) < CHUNKS {
+	sliceLen := len(data)
+
+	if sliceLen < CHUNKS {
 		return maximum(data), nil
 	}
 
 	var wg sync.WaitGroup
-	if len(data) < CHUNKS {
-		return 0, fmt.Errorf("Slice length tbigger than parts count")
-	}
 
 	dividedMaximums := make([]int, CHUNKS)
-	sliceLen := len(data)
-	splitLength := int(sliceLen / CHUNKS)
-	var part int
 
-	for part = range CHUNKS - 1 {
-		startPos := part * splitLength
-		endPos := startPos + splitLength
+	var i int
+
+	for i = 0; i < CHUNKS-1; i++ {
+		idx1 := sliceLen / CHUNKS * i
+		idx2 := sliceLen / CHUNKS * (i + 1)
+		slicePart := data[idx1:idx2]
 
 		wg.Add(1)
-		go func() {
+		go func(slicePart []int, i int) {
 			defer wg.Done()
-			dividedMaximums[part] = maximum(data[startPos:endPos])
-		}()
-
-		wg.Wait()
+			dividedMaximums[i] = maximum(slicePart)
+		}(slicePart, i)
 	}
 
-	dividedMaximums[CHUNKS-1] = maximum(data[part:sliceLen])
+	wg.Wait()
+
+	idx1 := sliceLen / CHUNKS * (i + 1)
+	dividedMaximums[i] = maximum(data[idx1:])
 
 	return maximum(dividedMaximums), nil
 }
